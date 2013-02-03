@@ -47,20 +47,20 @@ class Satellite(object):
 
 class SatBIOS:
 	def __init__(self, sat):
-		self.address = 0
+		self.address = "0000000000000000" # TODO make 64 bit instead of string
 		self.sat = sat
 
 	def start(self):
-		sat.cpu.start()
+		self.sat.cpu.start()
 
 	def stop(self):
-		sat.cpu.stop()
+		self.sat.cpu.stop()
 
 	def peek(self, addr):
-		sat.cpu.read(addr)
+		return self.sat.cpu.read(addr)
 
 	def poke(self, addr, val):
-		sat.cpu.write(addr, val)
+		self.sat.cpu.write(addr, val)
 
 
 # capable of generating a satellite from a schematic

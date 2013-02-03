@@ -17,10 +17,16 @@ class TelnetTest(TelnetProtocol, insults.TerminalProtocol, LineReceiver):
 	delimiter = '\n'
 
 	def __init__(self):
-		self.commands = {'connect':self.connect, 'rxtx':self.rxtx}
+		self.commands = {'connect':self.connect, 'dump':self.dump, 'rxtx':self.rxtx}
+
+	def success(self, msg):
+		self.terminal.write(flatten(A.fg.green[msg+'\n\r'], CharacterAttribute()))
 
 	def error(self, msg):
 		self.terminal.write(flatten(A.fg.red[msg+'\n\r'], CharacterAttribute()))
+
+	def printn(self, msg):
+		self.terminal.write(flatten(msg, CharacterAttribute()))
 
 	def rxtx(self, argument):
 		argument = argument.replace(" ", "")
@@ -29,10 +35,40 @@ class TelnetTest(TelnetProtocol, insults.TerminalProtocol, LineReceiver):
 		else:
 			self.error("error. rxtx: connect <4 character frequency (hex)>")
 
+	def dump(self, argument):
+		argument = argument.replace(" ", "")
+		if(len(argument)==0):
+			sat = self.target
+			if not sat:
+				self.error("error. not connected to satellite. use the connect command.")
+			else:
+				self.terminal.write(flatten(A.fg.blue["ADDR| DATA                                     | ASCII\n\r"], CharacterAttribute()))
+				self.terminal.write(flatten(A.fg.blue["=========================================================\n\r"], CharacterAttribute()))
+				
+				for section in range(0, 512, 8):
+					self.terminal.write(flatten(A.fg.blue["%0.4X| " % section], CharacterAttribute()))
+					for i in range(0, 8):
+						self.terminal.write(flatten(A.fg.green["%0.4X " % sat.bios.peek(section+i).value], CharacterAttribute()))
+					self.terminal.write(flatten(A.fg.blue["| "], CharacterAttribute()))
+					for i in range(0, 8):
+						c = sat.bios.peek(section+i).value
+						if(c>=32 and c<=126):
+							self.terminal.write(flatten(A.fg.green[chr(c)], CharacterAttribute()))
+						else:
+							self.terminal.write(flatten(A.fg.green["."], CharacterAttribute()))
+					self.terminal.write(flatten(A.fg.green["\n\r"], CharacterAttribute()))
+		else:
+			self.error("error. usage: dump")
+
 	def connect(self, argument):
 		argument = argument.replace(" ", "")
 		if(len(argument)==16):
-			self.error("error. connect tool doesn't exist!")
+			sat = world.getByAddr(argument)
+			if not sat:
+				self.error("error. no sat at address.")
+			else:
+				self.success("success. connected to satellite.")
+				self.target = sat
 		else:
 			self.error("error. usage: connect <16 character address (hex)>")
 
