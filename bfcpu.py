@@ -1,4 +1,5 @@
 from satellite import *
+import collections
 import time
 from sys import stdout
 from ctypes import *
@@ -17,6 +18,8 @@ class BFCPU(CPU):
 		self.ops = [self.right, self.left, self.inc, self.dec, self.out, self.into, self.jmpzero, self.jmpnonzero]
 
 	def tick(self):
+		self.bus.tick()
+
 		# execute the next instruction
 		instr = chr(self.read(self.pc).value)
 
@@ -27,6 +30,7 @@ class BFCPU(CPU):
 		self.pc += 1
 
 		if(self.pc>=128):
+			print "into data"
 			exit()
 
 	def reset():
@@ -38,8 +42,10 @@ class BFCPU(CPU):
 	def left(s):	s.dc -= 1; ##print "< "+str(s.dc)
 	def inc(s):		s.write(s.dc, s.read(s.dc).value+1); #print "+ "+str(s.read(s.dc))
 	def dec(s):		s.write(s.dc, s.read(s.dc).value-1); #print "- "+str(s.read(s.dc))
-	def out(s):		stdout.write(chr(s.read(s.dc).value)); #print "out!"
-	def into(s):	s.write(s.dc, ord(raw_input()[0]));
+	# def out(s):		stdout.write(chr(s.read(s.dc).value)); #print "out!"
+	# def into(s):	s.write(s.dc, ord(raw_input()[0]));
+	def out(s):		s.bus.tx(s.read(s.dc).value); #print "out!"
+	def into(s):	s.write(s.dc, s.bus.rx()); print str(s.read(s.dc))
 	def jmpzero(s):
 		#print "["
 		unmatched = 0
@@ -71,7 +77,7 @@ class BFCPU(CPU):
 class BFCPU_Bus(BusController):
 	def __init__(self):
 		super(BFCPU_Bus, self).__init__()
-		self.buf = []
+		self.buf = collections.deque([])
 		self.state = 'CMD'
 
 		self.addr = 0
@@ -92,6 +98,12 @@ class BFCPU_Bus(BusController):
 		elif(self.state == 'WRITE_VAL'):
 			self.buf.append(self.write((self.addr&0xFF00)>>8, self.addr&0xFF, val))
 			self.state = 'CMD'
+
+	def rx(self):
+		val = self.buf[0]
+		self.buf.rotate(-1)
+		del self.buf[-1]
+		return val
 
 	def clear(self):
 		del self.buf[:] 
