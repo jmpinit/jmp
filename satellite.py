@@ -1,3 +1,4 @@
+from components import Component
 from ctypes import *
 import abc
 
@@ -15,56 +16,59 @@ class Satellite(object):
 		self.y = pos[1]
 		self.z = pos[2]
 
+		self.fx = pos[0]
+		self.fy = pos[1]
+		self.fz = pos[2]
+
 		self.vx = vel[0]
 		self.vy = vel[1]
 		self.vz = vel[2]
 
-		self.paused = True
-
 	def tick(self):
-		if(not self.paused):
-			self.cpu.tick()
+		# laws of physics
+		if(self.vx>1): self.vx = 1
+		if(self.vx<-1): self.vx = -1
+		if(self.vy>1): self.vy = 1
+		if(self.vy<-1): self.vy = -1
+		if(self.vz>1): self.vz = 1
+		if(self.vz<-1): self.vz = -1
 
-	def start(self):
-		self.paused = False
-	
-	def stop(self):
-		self.paused = True
+		# move
+		self.fx += self.vx
+		self.fy += self.vy
+		self.fz += self.vz
+
+		self.x = int(self.fx)
+		self.y = int(self.fy)
+		self.z = int(self.fz)
+
+		self.cpu.tick()
 
 
 class SatBIOS:
 	def __init__(self, sat):
 		self.sat = sat
 
-
+# capable of generating a satellite from a schematic
 class MOV:
 	def __init__(self, sat):
 		self.sat = sat
 
 
-class Component(object):
-	def __init__(self, numregs, sprite=' '):
-		self.sprite = sprite
-		self.registers = [c_ushort(0)] * numregs
-
-	def read(self, addr):
-		if(addr < 0): raise Exception("Component read: addresses should be greater than or equal to zero")
-		if(addr<len(self.registers)):
-			return self.registers[addr]
-		else:
-			return c_ushort(0)
-
-	def write(self, addr, val):
-		if(addr < 0): raise Exception("Component read: addresses should be greater than or equal to zero")
-		if(addr<len(self.registers)):
-			self.registers[addr] = val%BIGGEST
-
 class CPU(Component):
 	def __init__(self, ramsize):
+		self.paused = False
+
 		self.data = [c_ushort(0)] * ramsize
 		self.pc = 0
 
 		self.bus = None
+
+	def start(self):
+		self.paused = False
+	
+	def stop(self):
+		self.paused = True
 
 	def read(self, addr):
 		return self.data[addr % len(self.data)]
@@ -89,8 +93,7 @@ class BusController(object):
 			return 0
 
 	def write(self, device_addr, reg_addr, val):
-		if not isinstance(device_addr, c_ushort) or not isinstance(reg_addr, c_ushort) or not isinstance(val, c_ushort):
-			raise Exception("Arguments must be shorts.")
+		if not isinstance(val, c_ushort): val = c_ushort(val)
 		
 		if device_addr<len(self.slaves):
 			self.slaves[device_addr].write(reg_addr, val)

@@ -17,5 +17,5 @@ class World(object):
 		self.sats.append(sat)
 
 	def tick(self):
-		for sat in sats:
+		for sat in self.sats:
 			sat.tick()

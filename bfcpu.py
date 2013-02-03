@@ -18,20 +18,21 @@ class BFCPU(CPU):
 		self.ops = [self.right, self.left, self.inc, self.dec, self.out, self.into, self.jmpzero, self.jmpnonzero]
 
 	def tick(self):
-		self.bus.tick()
+		if not self.paused:
+			self.bus.tick()
 
-		# execute the next instruction
-		instr = chr(self.read(self.pc).value)
+			# execute the next instruction
+			instr = chr(self.read(self.pc).value)
 
-		# execute if known, nop otherwise
-		if instr in BFCPU.instructions:
-			self.ops[BFCPU.instructions.index(instr)]()
+			# execute if known, nop otherwise
+			if instr in BFCPU.instructions:
+				self.ops[BFCPU.instructions.index(instr)]()
 
-		self.pc += 1
+			self.pc += 1
 
-		if(self.pc>=128):
-			print "into data"
-			exit()
+			if(self.pc>=128):
+				print "into data"
+				self.stop()
 
 	def reset():
 		super(BFCPU, self).__init__(len(self.data))
@@ -89,14 +90,14 @@ class BFCPU_Bus(BusController):
 			elif(val == 1):
 				self.state = 'READ'
 			elif(val == 2):
-				self.state = 'WRITE'
+				self.state = 'WRITE_ADDR'
 		elif(self.state == 'READ'):
 			self.buf.append(self.read((val&0xFF00)>>8, val&0xFF))
 		elif(self.state == 'WRITE_ADDR'):
 			self.addr = val
 			self.state = 'WRITE_VAL'
 		elif(self.state == 'WRITE_VAL'):
-			self.buf.append(self.write((self.addr&0xFF00)>>8, self.addr&0xFF, val))
+			self.write((self.addr&0xFF00)>>8, self.addr&0xFF, val)
 			self.state = 'CMD'
 
 	def rx(self):
