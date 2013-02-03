@@ -4,13 +4,32 @@ import abc
 BIGGEST = 2**16
 
 class Satellite(object):
-	def __init__(self, cpu):
+	def __init__(self, cpu, pos, vel):
+		# hardware things
 		self.bios = SatBIOS(self)
 		self.cpu = cpu
 		self.mov = MOV(self)
 
+		# world
+		self.x = pos[0]
+		self.y = pos[1]
+		self.z = pos[2]
+
+		self.vx = vel[0]
+		self.vy = vel[1]
+		self.vz = vel[2]
+
+		self.paused = True
+
 	def tick(self):
-		self.cpu.tick()
+		if(not self.paused):
+			self.cpu.tick()
+
+	def start(self):
+		self.paused = False
+	
+	def stop(self):
+		self.paused = True
 
 
 class SatBIOS:
