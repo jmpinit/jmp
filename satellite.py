@@ -47,7 +47,21 @@ class Satellite(object):
 
 class SatBIOS:
 	def __init__(self, sat):
+		self.address = 0
 		self.sat = sat
+
+	def start(self):
+		sat.cpu.start()
+
+	def stop(self):
+		sat.cpu.stop()
+
+	def peek(self, addr):
+		sat.cpu.read(addr)
+
+	def poke(self, addr, val):
+		sat.cpu.write(addr, val)
+
 
 # capable of generating a satellite from a schematic
 class MOV:
