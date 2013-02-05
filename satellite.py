@@ -5,7 +5,9 @@ import abc
 BIGGEST = 2**16
 
 class Satellite(object):
-	def __init__(self, cpu, pos, vel):
+	def __init__(self, world, cpu, pos, vel):
+		self.world = world
+
 		# hardware things
 		self.bios = SatBIOS(self)
 		self.cpu = cpu
@@ -88,7 +90,7 @@ class CPU(Component):
 		return self.data[addr % len(self.data)]
 
 	def write(self, addr, val):
-		if not isinstance(val, c_ushort): val = c_ushort(val)
+		if not isinstance(val, c_ushort): val = c_ushort(int(val))
 		self.data[addr % len(self.data)] = val
 
 	@abc.abstractmethod

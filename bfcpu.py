@@ -40,13 +40,13 @@ class BFCPU(CPU):
 
 	# instructions
 	def right(s):	s.dc += 1; #print "> "+str(s.dc)
-	def left(s):	s.dc -= 1; ##print "< "+str(s.dc)
+	def left(s):	s.dc -= 1; #print "< "+str(s.dc)
 	def inc(s):		s.write(s.dc, s.read(s.dc).value+1); #print "+ "+str(s.read(s.dc))
 	def dec(s):		s.write(s.dc, s.read(s.dc).value-1); #print "- "+str(s.read(s.dc))
 	# def out(s):		stdout.write(chr(s.read(s.dc).value)); #print "out!"
 	# def into(s):	s.write(s.dc, ord(raw_input()[0]));
 	def out(s):		s.bus.tx(s.read(s.dc).value); #print "out!"
-	def into(s):	s.write(s.dc, s.bus.rx()); print str(s.read(s.dc))
+	def into(s):	s.write(s.dc, s.bus.rx()); #print "in! "+str(s.read(s.dc))
 	def jmpzero(s):
 		#print "["
 		unmatched = 0
@@ -101,10 +101,13 @@ class BFCPU_Bus(BusController):
 			self.state = 'CMD'
 
 	def rx(self):
-		val = self.buf[0]
-		self.buf.rotate(-1)
-		del self.buf[-1]
-		return val
+		if(len(self.buf)>0):
+			val = self.buf[0]
+			self.buf.rotate(-1)
+			del self.buf[-1]
+			return val
+		else:
+			return 0
 
 	def clear(self):
 		del self.buf[:] 

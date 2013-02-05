@@ -1,4 +1,5 @@
 from abc import *
+import Queue
 from ctypes import *
 from satellite import *
 import time
@@ -47,6 +48,37 @@ class Clock(Component):
 	def tick(self):
 		self.registers[0] = c_ushort(int(time.time())%BIGGEST)
 
+# FIFO buffered radio
+# register 0 = received data
+# register 1 = data to send
+# register 2 = band
+# register 3 = clear
+class Radio(Component):
+	def __init__(self, sat):
+		super(Radio, self).__init__(sat, 4, ['R'])
+		self.buf = Queue.Queue()
+	
+	# hook reading to update the buffer
+	def read(self, addr):
+		val = super(Radio, self).read(addr)
+		if(addr == 0):
+			if(not self.buf.empty()):
+				self.registers[0] = self.buf.get_nowait()
+			else:
+				self.registers[0] = 0
+		return val
+
+	def write(self, addr, val):
+		super(Radio, self).write(addr, val)
+
+	def tick(self):
+		# read from old radiobands
+		if not self.sat.world.radiobands[self.registers[2].value].empty():
+			print "i see in queue"
+			val = self.sat.world.radiobands[self.registers[2].value].get_nowait()
+			self.sat.world.radiobands[self.registers[2].value].put_nowait(val)
+			print val
+			self.buf.put_nowait(val)
 
 class SolarPanel(Component):
 	def __init__(self, sat):
