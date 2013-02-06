@@ -13,6 +13,8 @@ man = {
 }
 
 class Man(Cmd):
+	def __init__(self, player, ansi): super(type(self), self).__init__(player, ansi); self.man = man
+
 	def printdict(self, m, level = 0):
 		for key in m.keys():
 			self.out(('\t'*level)+key+':\n\r')
@@ -22,21 +24,11 @@ class Man(Cmd):
 				self.out(('\t'*level)+'\t'+str(m[key])+'\n\r')
 
 	def execute(self, arguments):
-		sat = self.player.sat
-		bios = sat.bios
-
-		if not sat:
-			self.error("not connected to satellite")
-			return
-
-		cleaned = command.decode(arguments)
-		opts = cleaned['options']
-
-		args = cleaned['args']
+		if(not super(type(self), self).execute(arguments)): return
 
 		# get the command
 		try:
-			cmd = getattr(cmds, args[0])
+			cmd = getattr(cmds, self.args[0])
 			if(cmd): self.printdict(cmd.man)
 		except AttributeError:
 			self.error("unknown command")

@@ -11,24 +11,17 @@ man = {
 }
 
 class Connect(Cmd):
+	def __init__(self, player, ansi): super(type(self), self).__init__(player, ansi); self.man = man
+
 	def execute(self, arguments):
+		if(not super(type(self), self).execute(arguments)): return
+
 		sat = self.player.sat
 		bios = sat.bios
 
-		if not sat:
-			self.error("not connected to satellite")
-			return
-
-		cleaned = command.decode(arguments)
-		opts = cleaned['options']
-		args = cleaned['args']
-
-		if opts['h']:
-			self.out(man['SYNOPSIS']+'\n\r')
-			return
-
+		address = int(self.args[0], 16)
 		try:
-			address = int(args[0], 16)
+			address = int(self.args[0], 16)
 		except:
 			self.error("invalid argument(s)")
 			return

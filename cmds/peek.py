@@ -1,5 +1,5 @@
 import command
-from command import Cmd
+from command import SatCmd
 
 man = {
 	'NAME':'peek - print hexadecimal or ASCII representations of satellite memory at a specific address.',
@@ -12,36 +12,33 @@ man = {
 	}
 }
 
-class Peek(Cmd):
+class Peek(SatCmd):
+	def __init__(self, player, ansi): super(type(self), self).__init__(player, ansi); self.man = man
+
 	def execute(self, arguments):
-		sat = self.player.sat
-		bios = sat.bios
-
-		if not sat:
-			self.error("not connected to satellite")
-			return
-
-		cleaned = command.decode(arguments)
-		opts = cleaned['options']
-		args = cleaned['args']
-
-		if opts['h']:
-			self.out(man['SYNOPSIS']+'\n\r')
-			return
+		if(not super(type(self), self).execute(arguments)): return
 
 		try:
-			address = int(args[0], 0)
-		except:
+			address = int(self.args[0], 0)
+		except(IndexError):
 			self.error("invalid argument(s)")
 			return
 
-		v = bios.peek(address).value
+		v = self.player.sat.bios.peek(address).value
 
-		# print hex
-		if(opts['H']): self.out("%0.4X\r\n" % v)
-
-		# printable?
-		if(v>=32 and v<=126):
-			self.out("ASCII: \n\r"+chr(v))
+		if(not 'A' in self.opts and not 'H' in self.opts):
+			self.out("%0.4X\r\n" % v)
+			if(v>=32 and v<=126):
+				self.out("ASCII: "+chr(v)+"\n\r")
+			else:
+				self.out("ASCII: nonprintable\n\r")
 		else:
-			self.out("ASCII: nonprintable\n\r")
+			# print hex
+			if('H' in self.opts): self.out("%0.4X\r\n" % v)
+
+			if 'A' in self.opts:
+				# printable?
+				if(v>=32 and v<=126):
+					self.out("ASCII: \n\r"+chr(v))
+				else:
+					self.out("ASCII: nonprintable\n\r")

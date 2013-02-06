@@ -11,24 +11,13 @@ man = {
 }
 
 class Rxtx(Cmd):
+	def __init__(self, player, ansi): super(type(self), self).__init__(player, ansi); self.man = man
+
 	def execute(self, arguments):
-		sat = self.player.sat
-		bios = sat.bios
-
-		if not sat:
-			self.error("not connected to satellite")
-			return
-
-		cleaned = command.decode(arguments)
-		opts = cleaned['options']
-		args = cleaned['args']
-
-		if opts['h']:
-			self.out(man['SYNOPSIS']+'\n\r')
-			return
+		if(not super(type(self), self).execute(arguments)): return
 
 		try:
-			band = int(args[0], 0)
+			band = int(self.args[0], 0)
 		except:
 			self.error("invalid argument(s)")
 

@@ -1,5 +1,5 @@
 import command
-from command import Cmd
+from command import SatCmd
 
 man = {
 	'NAME':'regdump - print hexadecimal representation of satellite CPU\'s registers.',
@@ -11,28 +11,19 @@ man = {
 	}
 }
 
-class Regdump(Cmd):
+class Regdump(SatCmd):
+	def __init__(self, player, ansi): super(type(self), self).__init__(player, ansi); self.man = man
+
 	def execute(self, arguments):
+		if(not super(type(self), self).execute(arguments)): return
+
 		sat = self.player.sat
-		bios = sat.bios
 
-		if not sat:
-			self.error("not connected to satellite")
-			return
-
-		cleaned = command.decode(arguments)
-		opts = cleaned['options']
-		args = cleaned['args']
-
-		if opts['h']:
-			self.out(man['SYNOPSIS']+'\n\r')
-			return
-
-		if(opts['P']):
+		if('P' in self.opts):
 			self.out("%0.4X\r\n" % sat.cpu.pc)
 			return
 
-		v = bios.peek(section+i).value
+		v = sat.bios.peek(section+i).value
 
 		for key in sat.cpu.registers.keys():
 			# print hex

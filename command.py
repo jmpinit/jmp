@@ -26,16 +26,23 @@ def decode(raw):
 
 	return {'options':opts, 'args':args}
 
+
 class Cmd(object):
 	def __init__(self, player, ansi):
 		self.player = player	# commands act on players
 		self.ansi = ansi		# input/output
 
-	# actuallly runs the command
-	@abstractmethod
+	# actually runs the command
 	def execute(self, raw_args):
-		arguments = decode(raw_args)
-		return
+		cleaned = decode(raw_args)
+		self.opts = cleaned['options']
+		self.args = cleaned['args']
+
+		if('h' in self.opts):
+			self.out(self.man['SYNOPSIS']+'\n\r')
+			return False
+
+		return True
 
 	def error(self, msg):
 		self.ansi.color("red")
@@ -44,3 +51,15 @@ class Cmd(object):
 
 	def out(self, msg):
 		self.ansi.out(msg)
+
+
+# command that requires active satellite connection
+class SatCmd(Cmd):
+	def execute(self, raw_args):
+		if(not super(SatCmd, self).execute(raw_args)): return False
+
+		if not self.player.sat:
+			self.error("not connected to satellite")
+			return False
+
+		return True
