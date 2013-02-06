@@ -23,4 +23,8 @@ class Stop(Cmd):
 		opts = cleaned['options']
 		args = cleaned['args']
 
+		if opts['h']:
+			self.out(man['SYNOPSIS']+'\n\r')
+			return
+
 		sat.cpu.stop()

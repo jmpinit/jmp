@@ -24,6 +24,10 @@ class Regdump(Cmd):
 		opts = cleaned['options']
 		args = cleaned['args']
 
+		if opts['h']:
+			self.out(man['SYNOPSIS']+'\n\r')
+			return
+
 		if(opts['P']):
 			self.out("%0.4X\r\n" % sat.cpu.pc)
 			return

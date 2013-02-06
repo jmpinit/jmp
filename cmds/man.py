@@ -31,6 +31,7 @@ class Man(Cmd):
 
 		cleaned = command.decode(arguments)
 		opts = cleaned['options']
+
 		args = cleaned['args']
 
 		# get the command

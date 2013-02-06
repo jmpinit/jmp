@@ -25,6 +25,10 @@ class Peek(Cmd):
 		opts = cleaned['options']
 		args = cleaned['args']
 
+		if opts['h']:
+			self.out(man['SYNOPSIS']+'\n\r')
+			return
+
 		try:
 			address = int(args[0], 0)
 		except:
