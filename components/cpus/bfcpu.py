@@ -1,4 +1,5 @@
-from satellite import *
+from components.base import * 
+
 import collections
 import time
 from sys import stdout
