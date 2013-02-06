@@ -21,7 +21,7 @@ class World(object):
 		if(abs(band)<len(self.radiobands)):
 			self.radiobands[band].put_nowait(val)
 
-	def getByAddr(self, addr):
+	def getByAddress(self, addr):
 		for sat in self.sats:
 			if(sat.bios.address==addr): return sat
 		return None
