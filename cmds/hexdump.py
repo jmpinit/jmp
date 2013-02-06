@@ -1,3 +1,4 @@
+import command
 from command import Cmd
 
 man = {
@@ -17,7 +18,7 @@ class Hexdump(Cmd):
 		bios = sat.bios
 		cpu = sat.cpu
 
-		cleaned = self.decode(arguments)
+		cleaned = command.decode(arguments)
 		opts = cleaned['options']
 		args = cleaned['args']
 
