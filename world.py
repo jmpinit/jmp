@@ -1,8 +1,8 @@
+from satellite import *
+import components.cpus.bfcpu
+
 from random import random
 import Queue
-from bfcpu import *
-from satellite import *
-from components import *
 
 class World(object):
 	def __init__(self, width, height, depth):
@@ -27,7 +27,7 @@ class World(object):
 		return None
 
 	def addRandom(self, x, y, z):
-		cpu = BFCPU(512)
+		cpu = components.cpus.bfcpu.BFCPU(512)
 
 		#p = "++++++++++[>+++++++>++++++++++>+++>+<<<<-]>++.>+.+++++++..+++.>++.<<+++++++++++++++.>.+++.------.--------.>+.>."
 		p = "[.>.>,<<]" # continuously read radio
@@ -41,6 +41,8 @@ class World(object):
 		cpu.bus.add(Radio(sat))
 
 		self.sats.append(sat)
+
+		return sat
 
 	def tick(self):
 		for sat in self.sats:
