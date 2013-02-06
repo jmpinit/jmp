@@ -16,11 +16,11 @@ man = {
 def decode(raw):
 	tokens = shlex.split(raw)
 
-	opts = {}
+	opts = []
 	args = []
 	for t in tokens:
 		if(t.startswith('-')):
-			opts[t[1:]] = True
+			opts.append(t[1:])
 		else:
 			args.append(t)
 
