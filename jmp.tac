@@ -28,7 +28,7 @@ class JMPServerTelnet(TelnetProtocol, insults.TerminalProtocol, LineReceiver):
 	def __init__(self):
 		self.commands = {
 			'connect':connect.Connect,
-			'dump':hexdump.Hexdump,
+			'hexdump':hexdump.Hexdump,
 			'man':man.Man,
 			'peek':peek.Peek,
 			'poke':poke.Poke,
