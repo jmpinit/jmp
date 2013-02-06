@@ -20,7 +20,7 @@ def decode(raw):
 	args = []
 	for t in tokens:
 		if(t.startswith('-')):
-			opt[t[1:]] = True
+			opts[t[1:]] = True
 		else:
 			args.append(t)
 
