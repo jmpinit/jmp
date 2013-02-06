@@ -59,12 +59,17 @@ class JMPServerTelnet(TelnetProtocol, insults.TerminalProtocol, LineReceiver):
 
 	def telnet_CMD(self, line):
 		parts = line.split(" ")
+		if(len(parts) == 1): parts.append("")
 
+		bin = None
 		try:
 			bin = self.commands[parts[0]]
-			bin.execute(parts[1])
 		except KeyError:
-			self.ansi.out("unrecognized")
+			self.ansi.color("red")
+			self.ansi.out("system: unrecognized\n\r")
+			self.ansi.clear()
+
+		if bin: bin.execute(' '.join(parts[1:]))
 
 		if(self.state == 'CMD'):
 			self.ansi.clear();
