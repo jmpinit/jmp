@@ -2,3 +2,9 @@
 *.pid
 *.pyc
 dev/
+
+# AVR bin files
+*.cof
+*.eep.hex
+*.hex
+*.obj
