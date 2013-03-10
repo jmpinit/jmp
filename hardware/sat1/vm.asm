@@ -1,6 +1,12 @@
 .include "m32def.inc"
 
 ;**** Macros
+.macro get_params	; for instructions with 2 params
+	rcall	vm_popd
+	movw	TEMPH:TEMPL, YH:YL
+	rcall	vm_popd
+.endmacro
+
 .macro inc_ptr
 	clr		r0
 	inc		@0L
@@ -137,7 +143,7 @@ op_const:
 	pc_to_X
 	from_ptr
 	rcall		vm_pushd
-	rjmp		tick_done3
+	rjmp		tick_done2
 
 op_call:
 op_jump:
@@ -145,11 +151,26 @@ op_jumpz:
 op_jumpif:
 	rjmp	tick_done
 
+; addr, val
 op_load:
-	rjmp	tick_done2
+	get_params
 
+	; load mem
+	movw	XH:XL, TEMPH:TEMPL
+	from_ptr
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
+; addr, val
 op_stor:
-	rjmp	tick_done2
+	get_params
+
+	; set mem
+	movw	XH:XL, TEMPH:TEMPL
+	to_ptr
+
+	rjmp	tick_done1
 
 op_return:
 op_drop:
@@ -161,10 +182,7 @@ op_rts:
 	rjmp	tick_done
 
 op_add:
-	; retrieve params
-	rcall	vm_popd
-	movw	TEMPH:TEMPL, YH:YL
-	rcall	vm_popd
+	get_params
 
 	; add them
 	add		YL, TEMPL
@@ -173,7 +191,7 @@ op_add:
 	; push result
 	rcall	vm_pushd
 
-	rjmp	tick_done5
+	rjmp	tick_done1
 op_sub:
 op_mul:
 op_div:
@@ -203,19 +221,15 @@ tick:
 
 	; execute the instruction
 	jumpto	jmptable, r16
-tick_done5:		; increment PC by 5
+tick_done3:		; increment PC by 3
 	clr		r0
 	inc		VM_PCL
 	adc		VM_PCH, r0
-tick_done4:		; increment PC by 3
+tick_done2:		; increment PC by 2
 	clr		r0
 	inc		VM_PCL
 	adc		VM_PCH, r0
-tick_done3:		; increment PC by 2
-	clr		r0
-	inc		VM_PCL
-	adc		VM_PCH, r0
-tick_done2:		; increment PC by 1
+tick_done1:		; increment PC by 1
 	clr		r0
 	inc		VM_PCL
 	adc		VM_PCH, r0
