@@ -15,9 +15,12 @@
 .equ BAUD	= 12 ; 38.4K baud
 
 ;**** Registers
-.def VM_PC	= r15
-.def VM_DP	= r14
-.def VM_RP	= r13
+.def VM_PCL	= r15
+.def VM_PCH = r14
+.def VM_DPL	= r13
+.def VM_DPH	= r12
+.def VM_RPL	= r11
+.def VM_RPH	= r10
 
 ;**** Pin definitions
 
@@ -87,18 +90,14 @@ op_jumpif:
 	rjmp	tick_done
 
 op_load:
-	;ldi		r16, 'L'
-	;rcall	ser_tx
-
-	sbi		PORT_DEBUG, PIN_LED
+	ldi		r16, 'L'
+	rcall	ser_tx
 
 	rjmp	tick_done
 
 op_stor:
-	;ldi		r16, 'S'
-	;rcall	ser_tx
-
-	cbi		PORT_DEBUG, PIN_LED
+	ldi		r16, 'S'
+	rcall	ser_tx
 
 	rjmp	tick_done
 
@@ -112,6 +111,7 @@ op_rts:
 	rjmp	tick_done
 
 op_add:
+	rjmp	tick_done
 op_sub:
 op_mul:
 op_div:
@@ -127,16 +127,58 @@ op_next:
 	rjmp	tick_done
 
 tick:
-	; TODO get the next instruction
+	; get the next instruction
+	ldi		XH, high(SRAM_START)
+	ldi		XL, low(SRAM_START)
 
+	add		XL, VM_PCL	; offset by VM's PC
+	adc		XH, VM_PCH
+
+	ld		r16, X
+	rcall	ser_tx
+
+	rjmp	tick_done2
+
+	; check if done
+	cpi		r16, $FF
+	breq	halt
 
 	; execute the instruction
 	jumpto	jmptable, r16
+tick_done3:		; increment PC by 2
+	clr		r0
+	inc		VM_PCL
+	adc		VM_PCH, r0
+tick_done2:		; increment PC by 1
+	clr		r0
+	inc		VM_PCL
+	adc		VM_PCH, r0
 tick_done:
 	ldi		r16, 10
 	rcall	delay
 
 	ret
+
+; loads program from PROGMEM into RAM
+load:
+	ldi		ZH, high(test_program<<1)
+	ldi		ZL, low(test_program<<1)
+
+	ldi		XH, high(SRAM_START)
+	ldi		XL, low(SRAM_START)
+
+	ldi		r17, 5
+load_loop:
+	lpm		r16, Z+
+	st		X+, r16
+	
+	dec		r17
+	brne	load_loop
+
+	ret
+
+halt:
+	rjmp	halt
 
 ;INPUT: r16 time
 ;DESTROYS: r0, r1, r2
@@ -180,17 +222,19 @@ reset:
 	ldi		r16, 'i'
 	rcall	ser_tx
 
+	; load the test program
+	rcall	load
+
+	clr		VM_PCL
+	clr		VM_PCH
+
 forever:
-	ldi		r16, VM_OP_LOAD
 	rcall	tick
-
-	ldi		r16, VM_OP_STOR
-	rcall	tick
-
-	ldi		r16, 't'
-	rcall	ser_tx
-	ldi		r16, 13
-	rcall	ser_tx
 
 	rjmp	forever
 
+test_program:
+	.db		'h', 'e', 'l', 'l', 'o'
+	;.db		"hey there!"
+	;.db		VM_OP_LOAD, VM_OP_STOR, VM_OP_LOAD, VM_OP_STOR, $FF, $FF
+	;.db		VM_OP_CONST, 56, VM_OP_CONST, 91, VM_OP_ADD, 255
