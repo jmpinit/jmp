@@ -77,6 +77,10 @@
 ; general
 .def TEMPH	= r9
 .def TEMPL	= r8
+.def TEMP2	= r7
+.def TEMP3	= r6
+.def TEMP4	= r5
+.def TEMP5	= r4
 
 ;**** Pin definitions
 
@@ -174,7 +178,19 @@ op_stor:
 
 op_return:
 op_drop:
+	rcall	vm_popd
+	rjmp	tick_done1
+
 op_swap:
+	get_params
+
+	; swap them
+	rcall	vm_pushd
+	movw	YH:YL, TEMPH:TEMPL
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
 op_dup:
 op_over:
 op_str:
@@ -192,14 +208,103 @@ op_add:
 	rcall	vm_pushd
 
 	rjmp	tick_done1
+
 op_sub:
+	get_params
+
+	; subtract them
+	sub		YL, TEMPL
+	sbc		YH, TEMPH
+
+	; push result
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
 op_mul:
+	get_params
+
+	; multiply them
+	mul		YH, TEMPH
+	mov		TEMP4, r0
+	mov		TEMP5, r1
+
+	mul		YL, TEMPL
+	mov		TEMP2, r0
+	mov		TEMP3, r1
+
+	mul		YH, TEMPL
+	add		TEMP3, r0
+	adc		TEMP4, r1
+
+	mul		YL, TEMPH
+	add		TEMP3, r0
+	adc		TEMP4, r1
+
+	clr		r0
+	adc		TEMP5, r0
+
+	; push results
+	mov		YH, TEMP5
+	mov		YL, TEMP4
+	rcall	vm_pushd
+
+	mov		YH, TEMP3
+	mov		YL, TEMP2
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
 op_div:
 op_mod:
 op_and:
+	get_params
+
+	; AND them
+	and		YL, TEMPL
+	and		YH, TEMPH
+
+	; push result
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+	
 op_or:
+	get_params
+
+	; OR them
+	or		YL, TEMPL
+	or		YH, TEMPH
+
+	; push result
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
 op_xor:
+	get_params
+
+	; XOR them
+	eor		YL, TEMPL
+	eor		YH, TEMPH
+
+	; push result
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
 op_not:
+	rcall	vm_popd
+
+	; NOT it
+	com		YL
+	com		YH
+
+	; push result
+	rcall	vm_pushd
+
+	rjmp	tick_done1
+
 op_sgt:
 op_slt:
 op_sync:
