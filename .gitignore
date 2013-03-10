@@ -8,3 +8,7 @@ dev/
 *.eep.hex
 *.hex
 *.obj
+
+# AVR studio garbage
+*.aps
+*.orig
