@@ -93,13 +93,13 @@ op_load:
 	ldi		r16, 'L'
 	rcall	ser_tx
 
-	rjmp	tick_done
+	rjmp	tick_done2
 
 op_stor:
 	ldi		r16, 'S'
 	rcall	ser_tx
 
-	rjmp	tick_done
+	rjmp	tick_done2
 
 op_return:
 op_drop:
@@ -133,6 +133,8 @@ tick:
 
 	add		XL, VM_PCL	; offset by VM's PC
 	adc		XH, VM_PCH
+
+	ld		r16, X
 
 	; check if done
 	cpi		r16, $FF
