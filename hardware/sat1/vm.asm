@@ -4,8 +4,8 @@
 .macro jumpto
 	ldi	ZL, low(@0)
 	ldi	ZH, high(@0)
-	add ZL, @1
 	clr	r0
+	add ZL, @1
 	adc ZH, r0 
 	ijmp
 .endmacro
@@ -78,13 +78,65 @@ jmptable:
 	rjmp op_sync
 	rjmp op_next
 
+; VM operations
+op_const:
+op_call:
+op_jump:
+op_jumpz:
+op_jumpif:
+	rjmp	tick_done
+
+op_load:
+	;ldi		r16, 'L'
+	;rcall	ser_tx
+
+	sbi		PORT_DEBUG, PIN_LED
+
+	rjmp	tick_done
+
+op_stor:
+	;ldi		r16, 'S'
+	;rcall	ser_tx
+
+	cbi		PORT_DEBUG, PIN_LED
+
+	rjmp	tick_done
+
+op_return:
+op_drop:
+op_swap:
+op_dup:
+op_over:
+op_str:
+op_rts:
+	rjmp	tick_done
+
+op_add:
+op_sub:
+op_mul:
+op_div:
+op_mod:
+op_and:
+op_or:
+op_xor:
+op_not:
+op_sgt:
+op_slt:
+op_sync:
+op_next:
+	rjmp	tick_done
+
 tick:
-	; get the next instruction
-	
+	; TODO get the next instruction
+
 
 	; execute the instruction
 	jumpto	jmptable, r16
 tick_done:
+	ldi		r16, 10
+	rcall	delay
+
+	ret
 
 ;INPUT: r16 time
 ;DESTROYS: r0, r1, r2
@@ -123,24 +175,22 @@ reset:
 	rcall	ser_init
 
 	; say hello
-	ldi		r16, 100
-	rcall	delay
-
 	ldi		r16, 'h'
 	rcall	ser_tx
 	ldi		r16, 'i'
 	rcall	ser_tx
 
 forever:
-	sbi		PORT_DEBUG, PIN_LED
+	ldi		r16, VM_OP_LOAD
+	rcall	tick
 
-	ldi		r16, 10
-	rcall	delay
+	ldi		r16, VM_OP_STOR
+	rcall	tick
 
-	cbi		PORT_DEBUG, PIN_LED
-
-	ldi		r16, 10
-	rcall	delay
+	ldi		r16, 't'
+	rcall	ser_tx
+	ldi		r16, 13
+	rcall	ser_tx
 
 	rjmp	forever
 
