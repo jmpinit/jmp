@@ -134,11 +134,6 @@ tick:
 	add		XL, VM_PCL	; offset by VM's PC
 	adc		XH, VM_PCH
 
-	ld		r16, X
-	rcall	ser_tx
-
-	rjmp	tick_done2
-
 	; check if done
 	cpi		r16, $FF
 	breq	halt
@@ -178,6 +173,7 @@ load_loop:
 	ret
 
 halt:
+	sbi		PORT_DEBUG, PIN_LED
 	rjmp	halt
 
 ;INPUT: r16 time
@@ -231,10 +227,11 @@ reset:
 forever:
 	rcall	tick
 
+	ldi		r16, 'T'
+	rcall	ser_tx
+
 	rjmp	forever
 
 test_program:
-	.db		'h', 'e', 'l', 'l', 'o'
-	;.db		"hey there!"
-	;.db		VM_OP_LOAD, VM_OP_STOR, VM_OP_LOAD, VM_OP_STOR, $FF, $FF
+	.db		VM_OP_LOAD, VM_OP_STOR, VM_OP_LOAD, VM_OP_STOR, $FF, $FF
 	;.db		VM_OP_CONST, 56, VM_OP_CONST, 91, VM_OP_ADD, 255
