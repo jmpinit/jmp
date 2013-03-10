@@ -4,13 +4,8 @@
 .macro jumpto
 	ldi	ZL, low(@0)
 	ldi	ZH, high(@0)
-<<<<<<< HEAD
 	clr	r0
 	add ZL, @1
-=======
-	add ZL, @1
-	clr	r0
->>>>>>> 838cd623c5b6d740220cbc6b8c935d994256f56a
 	adc ZH, r0 
 	ijmp
 .endmacro
@@ -20,18 +15,12 @@
 .equ BAUD	= 12 ; 38.4K baud
 
 ;**** Registers
-<<<<<<< HEAD
 .def VM_PCL	= r15
 .def VM_PCH = r14
 .def VM_DPL	= r13
 .def VM_DPH	= r12
 .def VM_RPL	= r11
 .def VM_RPH	= r10
-=======
-.def VM_PC	= r15
-.def VM_DP	= r14
-.def VM_RP	= r13
->>>>>>> 838cd623c5b6d740220cbc6b8c935d994256f56a
 
 ;**** Pin definitions
 
@@ -92,7 +81,6 @@ jmptable:
 	rjmp op_sync
 	rjmp op_next
 
-<<<<<<< HEAD
 ; VM operations
 op_const:
 op_call:
@@ -187,15 +175,6 @@ load_loop:
 halt:
 	sbi		PORT_DEBUG, PIN_LED
 	rjmp	halt
-=======
-tick:
-	; get the next instruction
-	
-
-	; execute the instruction
-	jumpto	jmptable, r16
-tick_done:
->>>>>>> 838cd623c5b6d740220cbc6b8c935d994256f56a
 
 ;INPUT: r16 time
 ;DESTROYS: r0, r1, r2
@@ -234,18 +213,11 @@ reset:
 	rcall	ser_init
 
 	; say hello
-<<<<<<< HEAD
-=======
-	ldi		r16, 100
-	rcall	delay
-
->>>>>>> 838cd623c5b6d740220cbc6b8c935d994256f56a
 	ldi		r16, 'h'
 	rcall	ser_tx
 	ldi		r16, 'i'
 	rcall	ser_tx
 
-<<<<<<< HEAD
 	; load the test program
 	rcall	load
 
@@ -263,18 +235,3 @@ forever:
 test_program:
 	.db		VM_OP_LOAD, VM_OP_STOR, VM_OP_LOAD, VM_OP_STOR, $FF, $FF
 	;.db		VM_OP_CONST, 56, VM_OP_CONST, 91, VM_OP_ADD, 255
-=======
-forever:
-	sbi		PORT_DEBUG, PIN_LED
-
-	ldi		r16, 10
-	rcall	delay
-
-	cbi		PORT_DEBUG, PIN_LED
-
-	ldi		r16, 10
-	rcall	delay
-
-	rjmp	forever
-
->>>>>>> 838cd623c5b6d740220cbc6b8c935d994256f56a
