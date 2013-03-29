@@ -11,4 +11,5 @@ dev/
 
 # AVR studio garbage
 *.aps
+*.aws
 *.orig
